@@ -260,6 +260,30 @@
             margin: 3rem 0;
         }
 
+        /* Lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            cursor: zoom-out;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .lightbox-overlay.open {
+            display: flex;
+        }
+
+        .lightbox-overlay img {
+            max-width: 95%;
+            max-height: 95vh;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .sidebar {
@@ -307,14 +331,14 @@
                     <p>Flyway Desktop helps teams manage database schema changes across environments. One of the core workflows compares a schema model to a target database, and generates migration scripts from the diffs.</p>
 
                     <div class="figure">
-                        <a href="comparison_workflow.jpg" target="_blank"><img src="comparison_workflow.jpg" alt="Diagram showing the Flyway comparison workflow: schema model compared against a database to generate migration scripts"></a>
+                        <img src="comparison_workflow.jpg" alt="Diagram showing the Flyway comparison workflow: schema model compared against a database to generate migration scripts" onclick="openLightbox(this)">
                         <div class="figure-caption">The core Flyway Desktop workflow: compare a schema model against a target database, then generate migration scripts from the differences.</div>
                     </div>
 
                     <p><strong>But some objects should only exist in certain environments.</strong> For example, tables like <code>dbo.t_TestUsers</code> might need to exist in Dev and Staging, but not in Prod.</p>
 
                     <div class="figure">
-                        <a href="environment-specific_objects.jpg" target="_blank"><img src="environment-specific_objects.jpg" alt="Flyway Desktop showing dbo.t_TestUsers detected as a new object in the Dev database comparison"></a>
+                        <img src="environment-specific_objects.jpg" alt="Flyway Desktop showing dbo.t_TestUsers detected as a new object in the Dev database comparison" onclick="openLightbox(this)">
                         <div class="figure-caption">Flyway detects <code>dbo.t_TestUsers</code> as a new object in Dev. This table is needed for testing but should never reach Production.</div>
                     </div>
 
@@ -332,7 +356,7 @@
                     <p>When updating the schema model, the "Configure comparison" option allows users to set filters to include or exclude objects, or subsets of them based on properties like object name. These filters apply when generating the migration script.</p>
 
                     <div class="figure">
-                        <a href="Flyway_Desktop_filter.jpg" target="_blank"><img src="Flyway_Desktop_filter.jpg" alt="Flyway Desktop Configure comparisons dialog showing the Filters tab with a rule to exclude Tables where Object name contains Test"></a>
+                        <img src="Flyway_Desktop_filter.jpg" alt="Flyway Desktop Configure comparisons dialog showing the Filters tab" onclick="openLightbox(this)">
                         <div class="figure-caption">The current filter rule-builder in Flyway Desktop. Rules can include or exclude objects by type and name.</div>
                     </div>
 
@@ -343,7 +367,7 @@
 
                 <section id="exploration">
                     <h2>Exploration</h2>
-                    <p>I explored two approaches. They address the same core problem but make different trade-offs around complexity, discoverability, and how much the existing UI needs to change.</p>
+                    <p>I explored three approaches. They address the same core problem but make different trade-offs around complexity, discoverability, and how much the existing UI needs to change.</p>
 
                     <div class="option">
                         <h3>Option A: Environment tags on filter rules</h3>
@@ -358,6 +382,9 @@
                             <ul>
                                 <li>The rule list could get long. Simon had hundreds of databases, so this could devolve into a filter management problem depending on how many environment-specific filters are required.</li>
                             </ul>
+                            <div class="figure" style="margin-top: 0.75rem; margin-bottom: 0;">
+                                <img src="Option_a_pressure_tested.jpg" alt="Prototype pressure-tested with many filter rules, showing the UI could become messy with many environment-specific filters" onclick="openLightbox(this)">
+                            </div>
                         </div>
                     </div>
 
@@ -372,6 +399,22 @@
                             <strong>❌ Cons</strong>
                             <ul>
                                 <li>Separates filter management into different areas. Increases the cognitive load to manage and maintain them, and introduces a second place to look when debugging why an object appeared or didn't in a comparison.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="option">
+                        <h3>Option C: Use filter files</h3>
+                        <p>Flyway's CLI supports a <code>filterFile</code> parameter. Some teams may already be doing environment-specific filtering using separate .rgf files (e.g. <code>filter-dev.rgf</code>, <code>filter-prod.rgf</code>). This option would bring that functionality into Desktop: let users create and manage multiple filter files, each assigned to an environment.</p>
+                        <div class="pros-cons">
+                            <strong>✅ Pros</strong>
+                            <ul>
+                                <li>Builds on an existing CLI feature rather than introducing a new concept.</li>
+                                <li>Each environment's filters are self-contained, making it easy to manage and version control.</li>
+                            </ul>
+                            <strong>❌ Cons</strong>
+                            <ul>
+                                <li>Splits filter management across multiple files. There would be no single view of all filter rules.</li>
                             </ul>
                         </div>
                     </div>
@@ -398,7 +441,7 @@
                 <section id="validation">
                     <h2>What I'd want to check before starting</h2>
                     <ul>
-                        <li><strong>How widespread is this problem?</strong> The UserVoice post is one data point. To validate it further, I'd check support tickets and interview users to understand how prevalent it is, how painful it is, and what workarounds exist today.</li>
+                        <li><strong>Are CLI teams already solving this?</strong> I'd want to understand whether teams are already working around this by maintaining separate .rgf files and passing them via CLI, because if so, we'd need to ensure Desktop has parity.</li>
                         <li><strong>Can we surface and reference environment data in filters?</strong> Flyway already has deployment environments with IDs and display names. I'd want to confirm with Engineering that the filter system can reference them.</li>
                         <li><strong>How many environment-specific rules do teams need?</strong> Depending on the answer, this will impact the design direction. A few rules might be easily managed in the existing filter UI, but dozens of rules might need a different approach.</li>
                         <li><strong>How important is traceability?</strong> When a comparison result is missing an object, do teams need to understand why?</li>
@@ -430,7 +473,26 @@
         </div>
     </div>
 
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
     <script>
+        // Lightbox
+        function openLightbox(img) {
+            const overlay = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lightbox-img');
+            lbImg.src = img.src;
+            lbImg.alt = img.alt;
+            overlay.classList.add('open');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('open');
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
         // Highlight active nav link on scroll
         const sections = document.querySelectorAll('section[id]');
         const navLinks = document.querySelectorAll('.sidebar nav a');
