@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment-Specific Filtering in Flyway Desktop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 18px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1a1a1a;
+            background: #ffffff;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout with sidebar */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar nav */
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            min-width: 260px;
+            background: #fafafa;
+            border-right: 1px solid #e8e8e8;
+            padding: 2rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #e8e8e8;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-logo span {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #CC0000;
+            letter-spacing: -0.01em;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav li {
+            margin: 0;
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #555;
+            text-decoration: none;
+            transition: color 0.15s, background 0.15s;
+            line-height: 1.4;
+        }
+
+        .sidebar nav a:hover {
+            color: #CC0000;
+            background: #f0f0f0;
+        }
+
+        .sidebar nav a.active {
+            color: #CC0000;
+            background: #f0f0f0;
+            border-left: 3px solid #CC0000;
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 3rem 6rem;
+        }
+
+        /* Header */
+        .doc-header {
+            margin-bottom: 3.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #CC0000;
+        }
+
+        .doc-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #CC0000;
+            margin-bottom: 0.75rem;
+        }
+
+        .doc-subtitle {
+            font-size: 1rem;
+            color: #555;
+            font-weight: 400;
+        }
+
+        .doc-meta {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            padding-top: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: #CC0000;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        a:hover {
+            color: #5C0000;
+        }
+
+        code {
+            font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
+            font-size: 0.85em;
+            background: #f5f5f5;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 1.25rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        li strong {
+            font-weight: 600;
+        }
+
+        /* Figures */
+        .figure {
+            margin: 1.5rem 0 2rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .figure img {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: zoom-in;
+        }
+
+        .figure-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            background: #f9f9f9;
+            color: #999;
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .figure-caption {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+            color: #666;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Option cards */
+        .option {
+            margin: 1.5rem 0;
+            padding: 1.25rem 1.5rem;
+            background: #fafafa;
+            border-left: 3px solid #CC0000;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .option h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .option p:last-child {
+            margin-bottom: 0;
+        }
+
+        .pros-cons {
+            margin-top: 0.75rem;
+        }
+
+        .pros-cons strong {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #555;
+        }
+
+        /* Divider */
+        .section-divider {
+            border: none;
+            border-top: 1px solid #e8e8e8;
+            margin: 3rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .page {
+                padding: 2.5rem 1.25rem 4rem;
+            }
+
+            .doc-header h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <span>Design Exploration</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#problem">Problem and context</a></li>
+                    <li><a href="#today">What exists today</a></li>
+                    <li><a href="#exploration">Exploration</a></li>
+                    <li><a href="#direction">The direction I'd take</a></li>
+                    <li><a href="#validation">What I'd want to check</a></li>
+                    <li><a href="#reflection">Reflection</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main">
+            <div class="page">
+                <header class="doc-header">
+                    <h1>Environment-Specific Filtering in Flyway Desktop</h1>
+                    <p class="doc-subtitle">A design exploration for Redgate</p>
+                    <p class="doc-meta">Babar Sattar &middot; September 2026</p>
+                </header>
+
+                <section id="problem">
+                    <h2>Problem and context</h2>
+                    <p>Flyway Desktop helps teams manage database schema changes across environments. One of the core workflows compares a schema model to a target database, and generates migration scripts from the diffs.</p>
+
+                    <div class="figure">
+                        <a href="comparison_workflow.jpg" target="_blank"><img src="comparison_workflow.jpg" alt="Diagram showing the Flyway comparison workflow: schema model compared against a database to generate migration scripts"></a>
+                        <div class="figure-caption">The core Flyway Desktop workflow: compare a schema model against a target database, then generate migration scripts from the differences.</div>
+                    </div>
+
+                    <p><strong>But some objects should only exist in certain environments.</strong> For example, tables like <code>dbo.t_TestUsers</code> might need to exist in Dev and Staging, but not in Prod.</p>
+
+                    <div class="figure">
+                        <a href="environment-specific_objects.jpg" target="_blank"><img src="environment-specific_objects.jpg" alt="Flyway Desktop showing dbo.t_TestUsers detected as a new object in the Dev database comparison"></a>
+                        <div class="figure-caption">Flyway detects <code>dbo.t_TestUsers</code> as a new object in Dev. This table is needed for testing but should never reach Production.</div>
+                    </div>
+
+                    <p>Flyway's comparison filters are global. An exclude rule applies to every comparison regardless of which environment is the target. There's no way to have environment-specific filters.</p>
+
+                    <p>This is the most-upvoted open feature request on <a href="https://redgate.uservoice.com/forums/949477-flyway">Flyway's UserVoice board</a> (27 votes at time of writing). <a href="https://redgate.uservoice.com/forums/949477-flyway/suggestions/50879783-filter-objects-based-on-environment">The original request</a> came from a user named Simon, where he mentioned hundreds of databases where environment-specific objects create noise in comparisons and risk in deployments.</p>
+
+                    <p>The signal is strong given the popularity of the post: teams working at scale hit this limitation and need to exclude objects everywhere (losing visibility in lower environments) or leave it unfiltered and accept noise in Prod comparisons.</p>
+                </section>
+
+                <hr class="section-divider">
+
+                <section id="today">
+                    <h2>What exists today</h2>
+                    <p>When updating the schema model, the "Configure comparison" option allows users to set filters to include or exclude objects, or subsets of them based on properties like object name. These filters apply when generating the migration script.</p>
+
+                    <div class="figure">
+                        <a href="Flyway_Desktop_filter.jpg" target="_blank"><img src="Flyway_Desktop_filter.jpg" alt="Flyway Desktop Configure comparisons dialog showing the Filters tab with a rule to exclude Tables where Object name contains Test"></a>
+                        <div class="figure-caption">The current filter rule-builder in Flyway Desktop. Rules can include or exclude objects by type and name.</div>
+                    </div>
+
+                    <p>The issue is that each filter is global: the filters you apply for comparing the schema model against Staging are the <strong>same ones used for Prod</strong>.</p>
+                </section>
+
+                <hr class="section-divider">
+
+                <section id="exploration">
+                    <h2>Exploration</h2>
+                    <p>I explored two approaches. They address the same core problem but make different trade-offs around complexity, discoverability, and how much the existing UI needs to change.</p>
+
+                    <div class="option">
+                        <h3>Option A: Environment tags on filter rules</h3>
+                        <p>Each filter gains an optional "Applies to" field where you select one or more environments. A rule tagged to Prod only applies when the comparison target is Prod. Untagged rules apply everywhere.</p>
+                        <div class="pros-cons">
+                            <strong>✅ Pros</strong>
+                            <ul>
+                                <li>Small change to the current UI.</li>
+                                <li>Simple mental model: each rule says what it does and where it applies.</li>
+                            </ul>
+                            <strong>❌ Cons</strong>
+                            <ul>
+                                <li>The rule list could get long. Simon had hundreds of databases, so this could devolve into a filter management problem depending on how many environment-specific filters are required.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="option">
+                        <h3>Option B: Environment filter profiles</h3>
+                        <p>Instead of tagging individual rules, you create filter profiles ("Dev filters", "Prod filters") and assign them to one or more databases. When Flyway runs a comparison, it looks up which profile applies to the target and uses that rule set.</p>
+                        <div class="pros-cons">
+                            <strong>✅ Pros</strong>
+                            <ul>
+                                <li>Potentially scales better for teams with many environment-specific filters.</li>
+                            </ul>
+                            <strong>❌ Cons</strong>
+                            <ul>
+                                <li>Separates filter management into different areas. Increases the cognitive load to manage and maintain them, and introduces a second place to look when debugging why an object appeared or didn't in a comparison.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="section-divider">
+
+                <section id="direction">
+                    <h2>The direction I'd take and why</h2>
+                    <p>I'd start with Option A: environment tags on filter rules.</p>
+
+                    <p>The primary reason is the small impact on UI and backwards compatibility for users. With this approach, existing customers with complex filters are unaffected. Changes are only required if a team actively needs environment-filtering. The mental model of where filters are managed remains intact.</p>
+
+                    <p><strong>Here's an interactive prototype of what this could look like in Flyway Desktop:</strong></p>
+
+                    <div class="figure" style="border: none;">
+                        <iframe src="filter-prototype.html" style="width: 100%; height: 520px; border: 1px solid #e0e0e0; border-radius: 4px;" frameborder="0"></iframe>
+                        <div class="figure-caption">Interactive prototype: try adding filters and specifying which environments they should apply to.</div>
+                    </div>
+                </section>
+
+                <hr class="section-divider">
+
+                <section id="validation">
+                    <h2>What I'd want to check before starting</h2>
+                    <ul>
+                        <li><strong>How widespread is this problem?</strong> The UserVoice post is one data point. To validate it further, I'd check support tickets and interview users to understand how prevalent it is, how painful it is, and what workarounds exist today.</li>
+                        <li><strong>Can we surface and reference environment data in filters?</strong> Flyway already has deployment environments with IDs and display names. I'd want to confirm with Engineering that the filter system can reference them.</li>
+                        <li><strong>How many environment-specific rules do teams need?</strong> Depending on the answer, this will impact the design direction. A few rules might be easily managed in the existing filter UI, but dozens of rules might need a different approach.</li>
+                        <li><strong>How important is traceability?</strong> When a comparison result is missing an object, do teams need to understand why?</li>
+                    </ul>
+                </section>
+
+                <hr class="section-divider">
+
+                <section id="reflection">
+                    <h2>Reflection</h2>
+
+                    <h3>What I did to understand the problem</h3>
+                    <p>I downloaded Flyway Desktop and set up a three-environment project (Dev, UAT, Prod) to get familiar with the workflow. I discovered SQLite isn't supported for schema model comparison, which pushed me to PostgreSQL. I created schema changes, generated migration scripts, and ran them across environments. I also reviewed Redgate's product documentation and read UserVoice requests to understand current pain points.</p>
+
+                    <h3>Assumptions I'm making</h3>
+                    <ol>
+                        <li>I'm assuming Simon's request is representative of a broader pattern. It has the most votes, but I don't have access to support tickets, customer interviews, or usage analytics to confirm.</li>
+                        <li>I'm assuming that Flyway Desktop's UI is the right place to solve this, rather than exploring alternatives that may better suit different user demographics (such as CLI-heavy teams).</li>
+                    </ol>
+
+                    <h3>What I'd do with more access</h3>
+                    <p>As an employee of Redgate, I would start with the questions above. Specifically, I'd check for support tickets mentioning filters or environment-specific objects, interview a handful of teams that experience this friction, and review any internal research that's already been done on this problem.</p>
+
+                    <p>I'd also want to understand the engineering constraints as soon as possible. Knowing what's feasible will shape the design direction.</p>
+
+                    <p>Finally, I'd want to prototype the environment filter UI and test it with users.</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Highlight active nav link on scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.sidebar nav a');
+
+        function updateActiveLink() {
+            let current = '';
+            sections.forEach(section => {
+                const top = section.offsetTop - 120;
+                if (window.scrollY >= top) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveLink);
+        updateActiveLink();
+    </script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flyway Filter Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+            display: flex; align-items: flex-start; justify-content: center;
+            min-height: 100vh; padding: 2rem;
+        }
+
+        .modal {
+            background: #fff; border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+            width: 100%; max-width: 860px;
+        }
+
+        /* Header */
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 1.25rem; border-bottom: 1px solid #e5e5e5;
+        }
+        .modal-header h2 { font-size: 1rem; font-weight: 700; color: #1a1a1a; }
+        .header-right { display: flex; align-items: center; gap: 1rem; }
+        .help-link {
+            font-size: 0.8rem; color: #4a6c9a; text-decoration: underline;
+            text-underline-offset: 2px;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .help-link:hover { color: #163459; }
+        .close-btn {
+            background: none; border: none; font-size: 1.2rem; color: #999;
+            cursor: pointer; padding: 0.25rem; line-height: 1;
+        }
+        .close-btn:hover { color: #333; }
+
+        /* Tabs */
+        .tabs { display: flex; padding: 0 1.25rem; border-bottom: 1px solid #e5e5e5; }
+        .tab {
+            padding: 0.75rem 0.75rem; font-size: 0.85rem; color: #666;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -1px; font-weight: 500;
+        }
+        .tab.active { color: #1a1a1a; border-bottom-color: #4a6c9a; }
+        .new-badge {
+            background: #163459; color: #fff; font-size: 0.6rem;
+            padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.02em;
+            vertical-align: middle; margin-left: 0.25rem;
+        }
+
+        /* Body */
+        .modal-body { padding: 1.25rem; }
+        .filter-description {
+            font-size: 0.85rem; color: #444; margin-bottom: 1.25rem; line-height: 1.5;
+        }
+        .filter-description a {
+            color: #4a6c9a; text-decoration: underline; text-underline-offset: 2px;
+        }
+        .filter-description a:hover { color: #163459; }
+
+        /* Top bar */
+        .top-bar {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 1rem;
+        }
+        .search-box { position: relative; width: 280px; }
+        .search-box fieldset {
+            border: 1px solid #ccc; border-radius: 4px; padding: 0; margin: 0;
+        }
+        .search-box:hover fieldset { border-color: #1a1a1a; }
+        .search-box:focus-within fieldset { border-color: #4a6c9a; }
+        .search-box legend {
+            font-size: 0.7rem; color: #888; padding: 0 0.3rem; margin-left: 0.5rem;
+        }
+        .search-box input {
+            width: 100%; border: none; outline: none;
+            padding: 0.4rem 2rem 0.4rem 0.6rem; font-size: 0.85rem;
+            font-family: inherit; background: transparent;
+        }
+        .search-icon { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
+        .search-icon svg { width: 16px; height: 16px; stroke: #999; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .add-rule-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 4px;
+            background: #fff; font-size: 0.85rem; font-weight: 500;
+            color: #1a1a1a; cursor: pointer; font-family: inherit;
+        }
+        .add-rule-btn:hover { background: #f5f5f5; border-color: #1a1a1a; }
+        .add-rule-btn .plus { font-size: 1.1rem; font-weight: 400; }
+
+        /* Rule cards */
+        .rules-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .rule-card {
+            background: #f5f5f5; border: 1px solid #e5e5e5;
+            border-radius: 6px; padding: 1rem 1.25rem;
+        }
+
+        .rule-card { position: relative; }
+        .rule-top-row { display: flex; align-items: flex-start; gap: 0.6rem; padding-right: 1.5rem; }
+        .rule-main { flex: 1; display: flex; align-items: flex-end; gap: 0.6rem; }
+        .rule-right { display: flex; align-items: flex-end; gap: 0.6rem; flex-shrink: 0; }
+
+        .remove-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 0; line-height: 1;
+            position: absolute; top: 0.35rem; right: 0.35rem;
+        }
+        .remove-circle {
+            display: flex; align-items: center; justify-content: center;
+            width: 15px; height: 15px; border-radius: 50%;
+            background: #F55C56; color: #fff; font-size: 0.65rem; line-height: 0;
+        }
+        .remove-circle::after {
+            content: ''; display: block;
+            width: 7px; height: 1.5px; background: #fff; border-radius: 1px;
+        }
+        .remove-btn:hover .remove-circle { background: #e04440; }
+
+        /* --- Dropdown with legend (object type, applies to) --- */
+        .field-labeled { position: relative; }
+        .field-labeled fieldset {
+            border: 1px solid #ccc; border-radius: 4px; padding: 0; margin: 0;
+            background: #fff;
+        }
+        .field-labeled:hover fieldset { border-color: #1a1a1a; }
+        .field-labeled.focused fieldset { border-color: #4a6c9a; }
+        .field-labeled fieldset legend {
+            font-size: 0.65rem; color: #888; padding: 0 0.25rem; margin-left: 0.4rem;
+        }
+        .field-labeled select {
+            width: 100%; border: none; outline: none;
+            padding: 0.3rem 1.8rem 0.3rem 0.5rem; font-size: 0.85rem;
+            font-family: inherit; background: transparent; cursor: pointer;
+            appearance: none; -webkit-appearance: none; color: #1a1a1a;
+            height: 28px;
+        }
+        .field-labeled::after {
+            content: '▾'; position: absolute; right: 0.6rem; bottom: 0.3rem;
+            color: #888; pointer-events: none; font-size: 0.8rem;
+        }
+        .select-object-type { min-width: 160px; }
+
+        /* --- Dropdown without legend (action, condition operator) --- */
+        .field-plain { position: relative; }
+        .field-plain-inner {
+            border: 1px solid #ccc; border-radius: 4px;
+            background: #fff; height: 36px; display: flex; align-items: center;
+        }
+        .field-plain:hover .field-plain-inner { border-color: #1a1a1a; }
+        .field-plain.focused .field-plain-inner { border-color: #4a6c9a; }
+        .field-plain select {
+            width: 100%; border: none; outline: none;
+            padding: 0 1.8rem 0 0.5rem; font-size: 0.85rem;
+            font-family: inherit; background: transparent; cursor: pointer;
+            appearance: none; -webkit-appearance: none; color: #1a1a1a;
+            height: 100%;
+        }
+        .field-plain::after {
+            content: '▾'; position: absolute; right: 0.6rem; top: 50%;
+            transform: translateY(-50%); color: #888; pointer-events: none; font-size: 0.8rem;
+        }
+        .select-action { min-width: 150px; }
+        .select-condition { min-width: 120px; }
+
+        /* Condition row */
+        .condition-area { display: none; }
+        .condition-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.75rem; }
+        .condition-label { font-size: 0.85rem; color: #444; white-space: nowrap; min-width: 90px; }
+        .condition-input { flex: 1; }
+        .condition-input-inner {
+            border: 1px solid #ccc; border-radius: 4px; background: #fff; height: 36px;
+            display: flex; align-items: center;
+        }
+        .condition-input:hover .condition-input-inner { border-color: #1a1a1a; }
+        .condition-input:focus-within .condition-input-inner { border-color: #4a6c9a; }
+        .condition-input input {
+            width: 100%; border: none; outline: none;
+            padding: 0 0.6rem; font-size: 0.85rem; font-family: inherit; height: 100%;
+        }
+        .add-condition {
+            font-size: 0.8rem; color: #4a6c9a; background: none; border: none;
+            cursor: pointer; font-family: inherit; font-weight: 500;
+            margin-top: 0.5rem; padding: 0.2rem 0;
+        }
+        .add-condition:hover { text-decoration: underline; }
+
+        /* Env multi-select */
+        .env-field { min-width: 180px; position: relative; }
+        .env-field fieldset {
+            border: 1px solid #ccc; border-radius: 4px; padding: 0; margin: 0;
+            background: #fff; cursor: pointer;
+        }
+        .env-field:hover fieldset { border-color: #1a1a1a; }
+        .env-field.focused fieldset { border-color: #4a6c9a; }
+        .env-field fieldset legend {
+            font-size: 0.65rem; color: #888; padding: 0 0.25rem; margin-left: 0.4rem;
+        }
+        .env-display {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
+            min-height: 28px; padding: 0.15rem 0.5rem;
+        }
+        .env-placeholder {
+            font-size: 0.78rem; color: #aaa; font-style: italic;
+            pointer-events: none; white-space: nowrap;
+        }
+        .env-chip {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            background: #e0e7ff; color: #163459; font-size: 0.72rem; font-weight: 600;
+            padding: 0.1rem 0.4rem; border-radius: 3px; line-height: 1.3;
+        }
+        .env-chip-remove {
+            cursor: pointer; font-size: 0.65rem; color: #6b7280;
+            display: flex; align-items: center; line-height: 1; margin-left: 0.1rem;
+        }
+        .env-chip-remove:hover { color: #1a1a1a; }
+        .env-dropdown {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid #4a6c9a; border-top: none;
+            border-radius: 0 0 4px 4px; z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .env-dropdown.open { display: block; }
+        .env-option {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.45rem 0.6rem; font-size: 0.85rem; cursor: pointer;
+        }
+        .env-option:hover { background: #f5f5f5; }
+        .env-option input[type="checkbox"] { accent-color: #4a6c9a; width: 15px; height: 15px; cursor: pointer; }
+        .env-option label { cursor: pointer; flex: 1; }
+
+        /* Footer */
+        .modal-footer {
+            display: flex; justify-content: flex-end; gap: 0.6rem;
+            padding: 1rem 1.25rem; border-top: 1px solid #e5e5e5;
+        }
+        .btn-cancel {
+            padding: 0.5rem 1.25rem; border: 1px solid #ccc; border-radius: 4px;
+            background: #fff; font-size: 0.85rem; font-family: inherit; color: #333; cursor: pointer;
+        }
+        .btn-cancel:hover { background: #f5f5f5; }
+        .btn-save {
+            padding: 0.5rem 1.5rem; border: none; border-radius: 4px;
+            background: #4a6c9a; color: #fff; font-size: 0.85rem;
+            font-weight: 600; font-family: inherit; cursor: pointer;
+        }
+        .btn-save:hover { background: #3d5a80; }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Configure comparisons</h2>
+            <div class="header-right">
+                <a href="#" class="help-link">↗ Help documentation</a>
+                <button class="close-btn">✕</button>
+            </div>
+        </div>
+        <div class="tabs">
+            <div class="tab">Static data</div>
+            <div class="tab active">Filters <span class="new-badge">NEW</span></div>
+        </div>
+        <div class="modal-body">
+            <p class="filter-description">A filter file controls what is included in comparisons between different representations of databases. <a href="#">See documentation</a></p>
+            <div class="top-bar">
+                <div class="search-box">
+                    <fieldset>
+                        <legend>Search object types</legend>
+                        <input type="text" placeholder="Search...">
+                    </fieldset>
+                    <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></span>
+                </div>
+                <button class="add-rule-btn" id="addRuleBtn"><span class="plus">+</span> Add rule</button>
+            </div>
+            <div class="rules-list" id="rulesList"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel">Cancel</button>
+            <button class="btn-save">Save</button>
+        </div>
+    </div>
+
+    <script>
+        let ruleCounter = 0;
+        const objectTypes = ['Table','View','Stored Procedure','Function','Sequence','Index','Trigger','Schema','User','Certificate','Role'];
+        const actions = ['Exclude','Exclude when','Include when'];
+        const conditionOps = ['contains','equals'];
+        const envOptions = ['DEV','UAT','PROD'];
+
+        function createRule(defaults) {
+            ruleCounter++;
+            const ruleId = 'rule-' + ruleCounter;
+            const card = document.createElement('div');
+            card.className = 'rule-card';
+            card.id = ruleId;
+
+            card.innerHTML = `
+                <div class="rule-top-row">
+                    <div class="rule-main">
+                        <div class="field-labeled select-object-type">
+                            <fieldset>
+                                <legend>Select object type</legend>
+                                <select>${objectTypes.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+                            </fieldset>
+                        </div>
+                        <div class="field-plain select-action">
+                            <div class="field-plain-inner">
+                                <select data-role="action">${actions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rule-right">
+                        <div class="env-field" data-rule="${ruleId}">
+                            <fieldset>
+                                <legend>Applies to</legend>
+                                <div class="env-display" data-toggle="env">
+                                    <span class="env-placeholder">Blank = All environments</span>
+                                </div>
+                            </fieldset>
+                            <div class="env-dropdown">
+                                ${envOptions.map(env=>`<div class="env-option"><input type="checkbox" id="${ruleId}-${env}" value="${env}"><label for="${ruleId}-${env}">${env}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <button class="remove-btn" onclick="removeRule('${ruleId}')"><div class="remove-circle"></div></button>
+                    </div>
+                </div>
+                <div class="condition-area">
+                    <div class="condition-row">
+                        <span class="condition-label">Object name</span>
+                        <div class="field-plain select-condition">
+                            <div class="field-plain-inner">
+                                <select>${conditionOps.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
+                            </div>
+                        </div>
+                        <div class="condition-input">
+                            <div class="condition-input-inner">
+                                <input type="text" placeholder="Value">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="add-condition">+ Add condition</button>
+                </div>
+            `;
+
+            const actionSelect = card.querySelector('[data-role="action"]');
+            const conditionArea = card.querySelector('.condition-area');
+            actionSelect.addEventListener('change', function() {
+                conditionArea.style.display = (this.value==='Exclude when'||this.value==='Include when') ? 'block' : 'none';
+            });
+
+            card.querySelectorAll('select').forEach(sel => {
+                sel.addEventListener('focus', function() {
+                    const p = this.closest('.field-labeled') || this.closest('.field-plain');
+                    if (p) p.classList.add('focused');
+                });
+                sel.addEventListener('blur', function() {
+                    const p = this.closest('.field-labeled') || this.closest('.field-plain');
+                    if (p) p.classList.remove('focused');
+                });
+            });
+
+            const envField = card.querySelector('.env-field');
+            const envDisplay = envField.querySelector('.env-display');
+            const envDropdown = envField.querySelector('.env-dropdown');
+            const checkboxes = envField.querySelectorAll('input[type="checkbox"]');
+
+            envDisplay.addEventListener('click', function(e) {
+                if (e.target.closest('.env-chip-remove')) return;
+                const isOpen = envDropdown.classList.contains('open');
+                closeAllDropdowns();
+                if (!isOpen) { envDropdown.classList.add('open'); envField.classList.add('focused'); }
+            });
+            checkboxes.forEach(cb => { cb.addEventListener('change', ()=> updateEnvDisplay(envField)); });
+
+            document.getElementById('rulesList').appendChild(card);
+
+            if (defaults) {
+                if (defaults.action) { actionSelect.value = defaults.action; actionSelect.dispatchEvent(new Event('change')); }
+                if (defaults.envs) {
+                    defaults.envs.forEach(env => { const cb = card.querySelector(`#${ruleId}-${env}`); if(cb) cb.checked = true; });
+                    updateEnvDisplay(envField);
+                }
+                if (defaults.conditionValue) { const input = card.querySelector('.condition-input input'); if(input) input.value = defaults.conditionValue; }
+            }
+        }
+
+        function updateEnvDisplay(envField) {
+            const display = envField.querySelector('.env-display');
+            const checked = envField.querySelectorAll('input[type="checkbox"]:checked');
+            const placeholder = display.querySelector('.env-placeholder');
+            display.querySelectorAll('.env-chip').forEach(c=>c.remove());
+            if (checked.length === 0) {
+                if (!placeholder) {
+                    const ph = document.createElement('span');
+                    ph.className = 'env-placeholder'; ph.textContent = 'Blank = All environments';
+                    display.appendChild(ph);
+                } else { placeholder.style.display = ''; }
+            } else {
+                if (placeholder) placeholder.style.display = 'none';
+                checked.forEach(cb => {
+                    const chip = document.createElement('span');
+                    chip.className = 'env-chip';
+                    chip.innerHTML = `${cb.value}<span class="env-chip-remove" data-env="${cb.value}">✕</span>`;
+                    display.appendChild(chip);
+                });
+                display.querySelectorAll('.env-chip-remove').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const cb = envField.querySelector(`input[value="${this.dataset.env}"]`);
+                        if(cb) cb.checked = false;
+                        updateEnvDisplay(envField);
+                    });
+                });
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.env-dropdown.open').forEach(d => {
+                d.classList.remove('open'); d.closest('.env-field').classList.remove('focused');
+            });
+        }
+        document.addEventListener('click', function(e) { if (!e.target.closest('.env-field')) closeAllDropdowns(); });
+
+        function removeRule(id) {
+            const el = document.getElementById(id);
+            if (el) { el.style.transition='opacity 0.15s,transform 0.15s'; el.style.opacity='0'; el.style.transform='translateX(-10px)'; setTimeout(()=>el.remove(),150); }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createRule({ action:'Exclude when', envs:['PROD'], conditionValue:'"Test"' });
+        });
+        document.getElementById('addRuleBtn').addEventListener('click', ()=>createRule());
+    </script>
+</body>
+</html>
