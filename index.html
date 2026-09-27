@@ -553,6 +553,9 @@
                                                 <ul>
                                                     <li>Splits filter management across areas. Introduces a second place to look when debugging why an object appeared or didn't in a comparison.</li>
                                                 </ul>
+                                                <div class="figure" style="margin-top: 0.75rem; margin-bottom: 0;">
+                                                    <img src="option_b_environments.png" alt="Flyway Desktop Environments page — filter profiles could live here but it separates filter management" onclick="openLightbox(this)">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -571,6 +574,43 @@
                                                 <ul>
                                                     <li>Splits filter management across multiple files. No single view of all filter rules.</li>
                                                 </ul>
+                                                <div style="margin-top: 0.75rem; margin-bottom: 0;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 200" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+                                                        <defs>
+                                                            <marker id="arrowC" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-auto"><path d="M0,0 L10,3.5 L0,7" fill="#999"/></marker>
+                                                        </defs>
+                                                        <!-- Dev -->
+                                                        <rect x="0" y="20" width="120" height="44" rx="6" fill="#163459"/>
+                                                        <text x="60" y="47" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="13" font-weight="600">Dev</text>
+                                                        <line x1="120" y1="42" x2="175" y2="42" stroke="#999" stroke-width="1.5" marker-end="url(#arrowC)"/>
+                                                        <rect x="180" y="16" width="160" height="52" rx="6" fill="#1e1e2e"/>
+                                                        <text x="260" y="38" text-anchor="middle" fill="#7f849c" font-family="SF Mono,Fira Code,monospace" font-size="10">📄</text>
+                                                        <text x="260" y="53" text-anchor="middle" fill="#cdd6f4" font-family="SF Mono,Fira Code,monospace" font-size="12">filter-dev.rgf</text>
+                                                        <!-- UAT -->
+                                                        <rect x="0" y="80" width="120" height="44" rx="6" fill="#163459"/>
+                                                        <text x="60" y="107" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="13" font-weight="600">UAT</text>
+                                                        <line x1="120" y1="102" x2="175" y2="102" stroke="#999" stroke-width="1.5" marker-end="url(#arrowC)"/>
+                                                        <rect x="180" y="76" width="160" height="52" rx="6" fill="#1e1e2e"/>
+                                                        <text x="260" y="98" text-anchor="middle" fill="#7f849c" font-family="SF Mono,Fira Code,monospace" font-size="10">📄</text>
+                                                        <text x="260" y="113" text-anchor="middle" fill="#cdd6f4" font-family="SF Mono,Fira Code,monospace" font-size="12">filter-uat.rgf</text>
+                                                        <!-- Prod -->
+                                                        <rect x="0" y="140" width="120" height="44" rx="6" fill="#CC0000"/>
+                                                        <text x="60" y="167" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="13" font-weight="600">Prod</text>
+                                                        <line x1="120" y1="162" x2="175" y2="162" stroke="#999" stroke-width="1.5" marker-end="url(#arrowC)"/>
+                                                        <rect x="180" y="136" width="160" height="52" rx="6" fill="#1e1e2e"/>
+                                                        <text x="260" y="158" text-anchor="middle" fill="#7f849c" font-family="SF Mono,Fira Code,monospace" font-size="10">📄</text>
+                                                        <text x="260" y="173" text-anchor="middle" fill="#cdd6f4" font-family="SF Mono,Fira Code,monospace" font-size="12">filter-prod.rgf</text>
+                                                        <!-- flyway.toml -->
+                                                        <rect x="400" y="56" width="160" height="96" rx="6" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+                                                        <text x="480" y="80" text-anchor="middle" fill="#666" font-family="SF Mono,Fira Code,monospace" font-size="10">flyway.toml</text>
+                                                        <text x="416" y="104" fill="#999" font-family="SF Mono,Fira Code,monospace" font-size="10">[environments.dev]</text>
+                                                        <text x="416" y="118" fill="#999" font-family="SF Mono,Fira Code,monospace" font-size="10">  filterFile=</text>
+                                                        <text x="497" y="118" fill="#CC0000" font-family="SF Mono,Fira Code,monospace" font-size="10">"filter-dev.rgf"</text>
+                                                        <text x="416" y="138" fill="#999" font-family="SF Mono,Fira Code,monospace" font-size="10">[environments.prod]</text>
+                                                        <text x="416" y="152" fill="#999" font-family="SF Mono,Fira Code,monospace" font-size="10">  filterFile=</text>
+                                                        <text x="497" y="152" fill="#CC0000" font-family="SF Mono,Fira Code,monospace" font-size="10">"filter-prod.rgf"</text>
+                                                    </svg>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -612,7 +652,7 @@
                         <li><strong>Are CLI teams already solving this?</strong> If teams maintain separate .rgf files and pass them via CLI, Desktop needs parity.</li>
                         <li><strong>Can filters reference environment data?</strong> Flyway already has deployment environments with IDs and display names. I'd want to confirm with Engineering that the filter system can reference them.</li>
                         <li><strong>How many environment-specific rules do teams need?</strong> A handful can live in the existing UI. Dozens might need a different approach.</li>
-                        <li><strong>How important is traceability?</strong> When a comparison result is missing an object, do teams need to understand why?</li>
+                        <li><strong>How important is surfacing?</strong> When a comparison result is missing an object, do we need to surface this to teams?</li>
                     </ul>
                 </section>
 
