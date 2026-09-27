@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Environment-Specific Filtering in Flyway Desktop</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +16,7 @@
         }
 
         html {
-            font-size: 18px;
+            font-size: 16px;
             scroll-behavior: smooth;
         }
 
@@ -223,34 +224,177 @@
             border-top: 1px solid #e0e0e0;
         }
 
-        /* Option cards */
-        .option {
-            margin: 1.5rem 0;
-            padding: 1.25rem 1.5rem;
-            background: #fafafa;
-            border-left: 3px solid #CC0000;
-            border-radius: 0 4px 4px 0;
+        .explore-slide-desc code {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
         }
 
-        .option h3 {
-            margin-top: 0;
+        /* Exploration carousel */
+        .explore-carousel {
+            position: relative;
+            margin-top: 1.5rem;
+            background: #8B1A1A;
+            border-radius: 16px;
+            padding: 40px 64px;
+        }
+
+        .explore-carousel-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .explore-carousel-stack {
+            position: relative;
+            width: 100%;
+        }
+
+        .explore-carousel-track {
+            position: relative;
+            overflow: hidden;
+            min-height: 320px;
+        }
+
+        .explore-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(60px) scale(0.97);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .explore-slide.active {
+            position: relative;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0) scale(1);
+        }
+
+        .explore-slide.exit-left {
+            transform: translateX(-60px) scale(0.97);
+            opacity: 0;
+        }
+
+        .explore-slide.exit-right {
+            transform: translateX(60px) scale(0.97);
+            opacity: 0;
+        }
+
+        .explore-slide.enter-left {
+            transform: translateX(-60px) scale(0.97);
+        }
+
+        .explore-slide.enter-right {
+            transform: translateX(60px) scale(0.97);
+        }
+
+        .explore-slide-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
             margin-bottom: 0.5rem;
         }
 
-        .option p:last-child {
-            margin-bottom: 0;
+        .explore-slide-desc {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.65;
+            margin-bottom: 1.25rem;
         }
 
-        .pros-cons {
-            margin-top: 0.75rem;
+        .explore-slide-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
         }
 
-        .pros-cons strong {
+        .explore-slide-card .pros-cons strong {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.03em;
             color: #555;
+        }
+
+        .explore-slide-card .pros-cons ul {
+            margin-bottom: 0.75rem;
+        }
+
+        .explore-slide-card .pros-cons li {
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .explore-slide-card .figure {
+            margin: 0.75rem 0 0;
+        }
+
+        .explore-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .explore-arrow:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .explore-arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .explore-arrow.prev { left: -52px; }
+        .explore-arrow.next { right: -52px; }
+
+        .explore-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .explore-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .explore-dot.active {
+            background: #fff;
+        }
+
+        @media (max-width: 900px) {
+            .explore-carousel {
+                padding: 28px 48px;
+            }
+            .explore-arrow.prev { left: -44px; }
+            .explore-arrow.next { right: -44px; }
+            .explore-arrow { width: 36px; height: 36px; }
+            .explore-carousel-track { min-height: 420px; }
         }
 
         /* Divider */
@@ -328,14 +472,14 @@
 
                 <section id="problem">
                     <h2>Problem and context</h2>
-                    <p>Flyway Desktop helps teams manage database schema changes across environments. One of the core workflows compares a schema model to a target database, and generates migration scripts from the diffs.</p>
+                    <p>Flyway Desktop compares a schema model to a target database and generates migration scripts from the diffs.</p>
 
                     <div class="figure">
                         <img src="comparison_workflow.jpg" alt="Diagram showing the Flyway comparison workflow: schema model compared against a database to generate migration scripts" onclick="openLightbox(this)">
                         <div class="figure-caption">The core Flyway Desktop workflow: compare a schema model against a target database, then generate migration scripts from the differences.</div>
                     </div>
 
-                    <p><strong>But some objects should only exist in certain environments.</strong> For example, tables like <code>dbo.t_TestUsers</code> might need to exist in Dev and Staging, but not in Prod.</p>
+                    <p><strong>Some objects should only exist in certain environments.</strong> A table like <code>dbo.t_TestUsers</code> might belong in Dev and Staging, but not in Prod.</p>
 
                     <div class="figure">
                         <img src="environment-specific_objects.jpg" alt="Flyway Desktop showing dbo.t_TestUsers detected as a new object in the Dev database comparison" onclick="openLightbox(this)">
@@ -344,78 +488,104 @@
 
                     <p>Flyway's comparison filters are global. An exclude rule applies to every comparison regardless of which environment is the target. There's no way to have environment-specific filters.</p>
 
-                    <p>This is the most-upvoted open feature request on <a href="https://redgate.uservoice.com/forums/949477-flyway">Flyway's UserVoice board</a> (27 votes at time of writing). <a href="https://redgate.uservoice.com/forums/949477-flyway/suggestions/50879783-filter-objects-based-on-environment">The original request</a> came from a user named Simon, where he mentioned hundreds of databases where environment-specific objects create noise in comparisons and risk in deployments.</p>
-
-                    <p>The signal is strong given the popularity of the post: teams working at scale hit this limitation and need to exclude objects everywhere (losing visibility in lower environments) or leave it unfiltered and accept noise in Prod comparisons.</p>
+                    <p>This is the <a href="https://redgate.uservoice.com/forums/949477-flyway/suggestions/50879783-filter-objects-based-on-environment">most-upvoted open feature request</a> on <a href="https://redgate.uservoice.com/forums/949477-flyway">Flyway's UserVoice board</a> (27 votes). The requester, Simon, mentioned hundreds of databases where environment-specific objects create noise in comparisons and risk in deployments. Teams either exclude objects everywhere (losing visibility in lower environments) or leave filters off and accept noise in Prod comparisons.</p>
                 </section>
 
                 <hr class="section-divider">
 
                 <section id="today">
                     <h2>What exists today</h2>
-                    <p>When updating the schema model, the "Configure comparison" option allows users to set filters to include or exclude objects, or subsets of them based on properties like object name. These filters apply when generating the migration script.</p>
+                    <p>Flyway's "Configure comparison" dialog lets users set filters to include or exclude objects by type and name.</p>
 
                     <div class="figure">
                         <img src="Flyway_Desktop_filter.jpg" alt="Flyway Desktop Configure comparisons dialog showing the Filters tab" onclick="openLightbox(this)">
-                        <div class="figure-caption">The current filter rule-builder in Flyway Desktop. Rules can include or exclude objects by type and name.</div>
+                        <div class="figure-caption">The current filter rule-builder in Flyway Desktop.</div>
                     </div>
 
-                    <p>The issue is that each filter is global: the filters you apply for comparing the schema model against Staging are the <strong>same ones used for Prod</strong>.</p>
+                    <p>Every filter is global: the same rules apply whether you're comparing against Staging or Prod.</p>
                 </section>
 
                 <hr class="section-divider">
 
                 <section id="exploration">
                     <h2>Exploration</h2>
-                    <p>I explored three approaches. They address the same core problem but make different trade-offs around complexity, discoverability, and how much the existing UI needs to change.</p>
+                    <p>I explored three approaches with different trade-offs around complexity and how much the existing UI needs to change.</p>
 
-                    <div class="option">
-                        <h3>Option A: Environment tags on filter rules</h3>
-                        <p>Each filter gains an optional "Applies to" field where you select one or more environments. A rule tagged to Prod only applies when the comparison target is Prod. Untagged rules apply everywhere.</p>
-                        <div class="pros-cons">
-                            <strong>✅ Pros</strong>
-                            <ul>
-                                <li>Small change to the current UI.</li>
-                                <li>Simple mental model: each rule says what it does and where it applies.</li>
-                            </ul>
-                            <strong>❌ Cons</strong>
-                            <ul>
-                                <li>The rule list could get long. Simon had hundreds of databases, so this could devolve into a filter management problem depending on how many environment-specific filters are required.</li>
-                            </ul>
-                            <div class="figure" style="margin-top: 0.75rem; margin-bottom: 0;">
-                                <img src="Option_a_pressure_tested.jpg" alt="Prototype pressure-tested with many filter rules, showing the UI could become messy with many environment-specific filters" onclick="openLightbox(this)">
+                    <div class="explore-carousel" id="exploreCarousel">
+                        <div class="explore-carousel-stage">
+                            <button class="explore-arrow prev" onclick="exploreChangeSlide(-1)" aria-label="Previous option">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+
+                            <div class="explore-carousel-stack">
+                                <div class="explore-carousel-track">
+                                    <div class="explore-slide active">
+                                        <p class="explore-slide-title">Option A: Environment tags on filter rules</p>
+                                        <p class="explore-slide-desc">Each filter gains an "Applies to" field where you select one or more environments. A rule tagged to Prod only fires when comparing against Prod. Untagged rules apply everywhere.</p>
+                                        <div class="explore-slide-card">
+                                            <div class="pros-cons">
+                                                <strong>✅ Pros</strong>
+                                                <ul>
+                                                    <li>Small change to the current UI.</li>
+                                                    <li>Simple mental model: each rule says what it does and where it applies.</li>
+                                                </ul>
+                                                <strong>❌ Cons</strong>
+                                                <ul>
+                                                    <li>The rule list could get long. Simon had hundreds of databases, so this could devolve into a filter management problem.</li>
+                                                </ul>
+                                                <div class="figure" style="margin-top: 0.75rem; margin-bottom: 0;">
+                                                    <img src="Option_a_pressure_tested.jpg" alt="Prototype pressure-tested with many filter rules" onclick="openLightbox(this)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="explore-slide">
+                                        <p class="explore-slide-title">Option B: Environment filter profiles</p>
+                                        <p class="explore-slide-desc">Instead of tagging individual rules, you create named filter profiles ("Dev filters", "Prod filters") and assign each to one or more databases. Flyway looks up which profile applies to the target and uses that rule set.</p>
+                                        <div class="explore-slide-card">
+                                            <div class="pros-cons">
+                                                <strong>✅ Pros</strong>
+                                                <ul>
+                                                    <li>Scales better for teams with many environment-specific filters.</li>
+                                                </ul>
+                                                <strong>❌ Cons</strong>
+                                                <ul>
+                                                    <li>Splits filter management across areas. Introduces a second place to look when debugging why an object appeared or didn't in a comparison.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="explore-slide">
+                                        <p class="explore-slide-title">Option C: Use filter files</p>
+                                        <p class="explore-slide-desc">Flyway's CLI already supports a <code>filterFile</code> parameter, and some teams may already use separate .rgf files per environment (e.g. <code>filter-dev.rgf</code>, <code>filter-prod.rgf</code>). This option would surface that in Desktop.</p>
+                                        <div class="explore-slide-card">
+                                            <div class="pros-cons">
+                                                <strong>✅ Pros</strong>
+                                                <ul>
+                                                    <li>Builds on an existing CLI feature rather than introducing a new concept.</li>
+                                                    <li>Each environment's filters are self-contained, easy to manage and version control.</li>
+                                                </ul>
+                                                <strong>❌ Cons</strong>
+                                                <ul>
+                                                    <li>Splits filter management across multiple files. No single view of all filter rules.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="option">
-                        <h3>Option B: Environment filter profiles</h3>
-                        <p>Instead of tagging individual rules, you create filter profiles ("Dev filters", "Prod filters") and assign them to one or more databases. When Flyway runs a comparison, it looks up which profile applies to the target and uses that rule set.</p>
-                        <div class="pros-cons">
-                            <strong>✅ Pros</strong>
-                            <ul>
-                                <li>Potentially scales better for teams with many environment-specific filters.</li>
-                            </ul>
-                            <strong>❌ Cons</strong>
-                            <ul>
-                                <li>Separates filter management into different areas. Increases the cognitive load to manage and maintain them, and introduces a second place to look when debugging why an object appeared or didn't in a comparison.</li>
-                            </ul>
+                            <button class="explore-arrow next" onclick="exploreChangeSlide(1)" aria-label="Next option">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="option">
-                        <h3>Option C: Use filter files</h3>
-                        <p>Flyway's CLI supports a <code>filterFile</code> parameter. Some teams may already be doing environment-specific filtering using separate .rgf files (e.g. <code>filter-dev.rgf</code>, <code>filter-prod.rgf</code>). This option would bring that functionality into Desktop: let users create and manage multiple filter files, each assigned to an environment.</p>
-                        <div class="pros-cons">
-                            <strong>✅ Pros</strong>
-                            <ul>
-                                <li>Builds on an existing CLI feature rather than introducing a new concept.</li>
-                                <li>Each environment's filters are self-contained, making it easy to manage and version control.</li>
-                            </ul>
-                            <strong>❌ Cons</strong>
-                            <ul>
-                                <li>Splits filter management across multiple files. There would be no single view of all filter rules.</li>
-                            </ul>
+                        <div class="explore-footer">
+                            <button class="explore-dot active" onclick="exploreGoToSlide(0)" aria-label="Option A"></button>
+                            <button class="explore-dot" onclick="exploreGoToSlide(1)" aria-label="Option B"></button>
+                            <button class="explore-dot" onclick="exploreGoToSlide(2)" aria-label="Option C"></button>
                         </div>
                     </div>
                 </section>
@@ -426,9 +596,7 @@
                     <h2>The direction I'd take and why</h2>
                     <p>I'd start with Option A: environment tags on filter rules.</p>
 
-                    <p>The primary reason is the small impact on UI and backwards compatibility for users. With this approach, existing customers with complex filters are unaffected. Changes are only required if a team actively needs environment-filtering. The mental model of where filters are managed remains intact.</p>
-
-                    <p><strong>Here's an interactive prototype of what this could look like in Flyway Desktop:</strong></p>
+                    <p>Existing customers with complex filters are unaffected. Changes are only needed if a team wants environment-filtering. Filters stay in one place, so the mental model doesn't change.</p>
 
                     <div class="figure" style="border: none;">
                         <iframe src="filter-prototype.html" style="width: 100%; height: 520px; border: 1px solid #e0e0e0; border-radius: 4px;" frameborder="0"></iframe>
@@ -441,9 +609,9 @@
                 <section id="validation">
                     <h2>What I'd want to check before starting</h2>
                     <ul>
-                        <li><strong>Are CLI teams already solving this?</strong> I'd want to understand whether teams are already working around this by maintaining separate .rgf files and passing them via CLI, because if so, we'd need to ensure Desktop has parity.</li>
-                        <li><strong>Can we surface and reference environment data in filters?</strong> Flyway already has deployment environments with IDs and display names. I'd want to confirm with Engineering that the filter system can reference them.</li>
-                        <li><strong>How many environment-specific rules do teams need?</strong> Depending on the answer, this will impact the design direction. A few rules might be easily managed in the existing filter UI, but dozens of rules might need a different approach.</li>
+                        <li><strong>Are CLI teams already solving this?</strong> If teams maintain separate .rgf files and pass them via CLI, Desktop needs parity.</li>
+                        <li><strong>Can filters reference environment data?</strong> Flyway already has deployment environments with IDs and display names. I'd want to confirm with Engineering that the filter system can reference them.</li>
+                        <li><strong>How many environment-specific rules do teams need?</strong> A handful can live in the existing UI. Dozens might need a different approach.</li>
                         <li><strong>How important is traceability?</strong> When a comparison result is missing an object, do teams need to understand why?</li>
                     </ul>
                 </section>
@@ -454,20 +622,16 @@
                     <h2>Reflection</h2>
 
                     <h3>What I did to understand the problem</h3>
-                    <p>I downloaded Flyway Desktop and set up a three-environment project (Dev, UAT, Prod) to get familiar with the workflow. I discovered SQLite isn't supported for schema model comparison, which pushed me to PostgreSQL. I created schema changes, generated migration scripts, and ran them across environments. I also reviewed Redgate's product documentation and read UserVoice requests to understand current pain points.</p>
+                    <p>I downloaded Flyway Desktop and set up a three-environment project (Dev, UAT, Prod) using PostgreSQL (SQLite isn't supported for schema model comparison). I created schema changes, generated migration scripts, and ran them across environments. I also reviewed Redgate's documentation and UserVoice requests.</p>
 
                     <h3>Assumptions I'm making</h3>
                     <ol>
-                        <li>I'm assuming Simon's request is representative of a broader pattern. It has the most votes, but I don't have access to support tickets, customer interviews, or usage analytics to confirm.</li>
-                        <li>I'm assuming that Flyway Desktop's UI is the right place to solve this, rather than exploring alternatives that may better suit different user demographics (such as CLI-heavy teams).</li>
+                        <li>Simon's request is representative of a broader pattern. It has the most votes, but I don't have access to support tickets, customer interviews, or usage analytics to confirm.</li>
+                        <li>Flyway Desktop's UI is the right place to solve this, rather than alternatives that may better suit CLI-heavy teams.</li>
                     </ol>
 
                     <h3>What I'd do with more access</h3>
-                    <p>As an employee of Redgate, I would start with the questions above. Specifically, I'd check for support tickets mentioning filters or environment-specific objects, interview a handful of teams that experience this friction, and review any internal research that's already been done on this problem.</p>
-
-                    <p>I'd also want to understand the engineering constraints as soon as possible. Knowing what's feasible will shape the design direction.</p>
-
-                    <p>Finally, I'd want to prototype the environment filter UI and test it with users.</p>
+                    <p>Check support tickets for filter-related complaints, interview teams who hit this friction, and review any internal research already done. I'd want to understand the engineering constraints early because what's feasible shapes the design. Then prototype and test with users.</p>
                 </section>
             </div>
         </div>
@@ -515,6 +679,51 @@
 
         window.addEventListener('scroll', updateActiveLink);
         updateActiveLink();
+
+        // Exploration carousel
+        let exploreCurrentSlide = 0;
+        let exploreAnimating = false;
+        const exploreSlides = document.querySelectorAll('#exploreCarousel .explore-slide');
+        const exploreDots = document.querySelectorAll('#exploreCarousel .explore-dot');
+
+        function exploreGoToSlide(index, dir) {
+            if (exploreAnimating) return;
+            const prev = exploreCurrentSlide;
+            const next = (index + exploreSlides.length) % exploreSlides.length;
+            if (prev === next) return;
+            if (dir === undefined) dir = next > prev ? 1 : -1;
+
+            exploreAnimating = true;
+
+            exploreSlides[next].classList.add(dir > 0 ? 'enter-right' : 'enter-left');
+            exploreSlides[next].style.position = 'absolute';
+            exploreSlides[next].style.opacity = '0';
+            exploreSlides[next].style.pointerEvents = 'none';
+
+            exploreSlides[next].offsetHeight;
+
+            exploreSlides[prev].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+            exploreSlides[prev].classList.remove('active');
+
+            exploreSlides[next].classList.remove('enter-right', 'enter-left');
+            exploreSlides[next].classList.add('active');
+            exploreSlides[next].style.position = '';
+            exploreSlides[next].style.opacity = '';
+            exploreSlides[next].style.pointerEvents = '';
+
+            exploreDots[prev].classList.remove('active');
+            exploreDots[next].classList.add('active');
+            exploreCurrentSlide = next;
+
+            setTimeout(() => {
+                exploreSlides[prev].classList.remove('exit-left', 'exit-right');
+                exploreAnimating = false;
+            }, 420);
+        }
+
+        function exploreChangeSlide(dir) {
+            exploreGoToSlide(exploreCurrentSlide + dir, dir);
+        }
     </script>
 </body>
 </html>
